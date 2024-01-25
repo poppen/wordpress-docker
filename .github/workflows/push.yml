@@ -1,0 +1,36 @@
+name: Build and Push Multiple Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and Push Image from dir2
+      uses: docker/build-push-action@v5
+      with:
+        context: ./dir2
+        file: ./4.7.19-php7.2/Dockerfile
+        push: true
+        tags: ghcr.io/${{ github.repository }}/:4.7.19-php7.2
+
+    - name: Logout from GitHub Container Registry
+      run: docker logout ghcr.io
+
